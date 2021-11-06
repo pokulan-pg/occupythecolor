@@ -22,7 +22,7 @@ public class ViewSplash extends View {
     @Override
     void render(){
         String db = "XM: "+screen_x_multipler + " YM: "+screen_y_multipler + "\n"+"ResX: "+otc.ResX+" ResY: "+otc.ResY+ "\n"+"ShiX: "+screen_x_shift+" ShiY: "+screen_y_shift;
-        Gdx.gl.glClearColor(0, 128f/255f, 0, 0);
+        Gdx.gl.glClearColor(0, 0, 0, 0);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         draw_texture(splash, 0, 0);

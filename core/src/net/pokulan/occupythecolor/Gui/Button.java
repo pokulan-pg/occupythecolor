@@ -86,6 +86,10 @@ public class Button {
         sprite.setColor(cl);
     }
 
+    public void setButtonText(String str){
+        this.text = str;
+    }
+
     public void draw(){
         if(view.isTap2((int)x, (int)(90 - y), (int)(x + w), (int)(90 - y - h))){
             sprite.setColor(Color.DARK_GRAY);

@@ -192,6 +192,12 @@ public class View {
 
         return false;
     }
+    public boolean isTap_multi(int x1, int y1, int x2, int y2){
+        if((otc.tapX - screen_x_shift) >= x1*screen_x_multipler && (otc.tapX - screen_x_shift) <= x2*screen_x_multipler && (otc.tapY - screen_y_shift) >= (y2*screen_y_multipler) && ((otc.tapY - screen_y_shift) <= y1*screen_y_multipler) ) {
+            return true;
+        }
+        return false;
+    }
     public boolean isTap2(int x1, int y1, int x2, int y2){
         if((Gdx.input.getX()- screen_x_shift) >= x1*screen_x_multipler && (Gdx.input.getX()- screen_x_shift) <= x2*screen_x_multipler && (Gdx.input.getY() - screen_y_shift) >= (y2*screen_y_multipler) && (Gdx.input.getY() - screen_y_shift) <= y1*screen_y_multipler && Gdx.input.isTouched()) return true;
         return false;
@@ -200,10 +206,24 @@ public class View {
         if((Gdx.input.getX(i)- screen_x_shift) >= x1*screen_x_multipler && (Gdx.input.getX(i)- screen_x_shift) <= x2*screen_x_multipler && (Gdx.input.getY(i) - screen_y_shift) >= (y2*screen_y_multipler) && (Gdx.input.getY(i) - screen_y_shift) <= y1*screen_y_multipler && Gdx.input.isTouched(i)) return true;
         return false;
     }
+    public boolean isTap2_multi(int x1, int y1, int x2, int y2){
+        for(int i = 0; i <2; i++) {
+            if (Gdx.input.isTouched(i)) {
+                if ((Gdx.input.getX(i) - screen_x_shift) >= x1 * screen_x_multipler && (Gdx.input.getX(i) - screen_x_shift) <= x2 * screen_x_multipler && (Gdx.input.getY(i) - screen_y_shift) >= (y2 * screen_y_multipler) && (Gdx.input.getY(i) - screen_y_shift) <= y1 * screen_y_multipler && Gdx.input.isTouched(i))
+                    return true;
+            }
+        }
+        return false;
+    }
 
     public void draw_sprite(Sprite spr,float x, float y){
         spr.setPosition((x) * screen_x_multipler + screen_x_shift,y * screen_y_multipler + screen_y_shift);
         spr.draw(batch);
+    }
+
+    public void draw_sprite(Sprite spr,float x, float y, SpriteBatch b){
+        spr.setPosition((x) * screen_x_multipler + screen_x_shift,y * screen_y_multipler + screen_y_shift);
+        spr.draw(b);
     }
 
     public void draw_sprite(Sprite spr){

@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -27,9 +28,14 @@ public class OccupyTheColor extends ApplicationAdapter implements GestureDetecto
 	Sprite[] particles_water = new Sprite[4];
 	Sprite[] particles_mud = new Sprite[4];
 	Texture shalow_shader;
+	Sprite candle;
+	Texture dark;
 	View view_current;
+	Field[] fields = new Field[8];
+	FieldColor[] all_colors = new FieldColor[8];
 
 	public Map<String, View> views = new HashMap<String, View>();
+	ScoreRow[] tabela_wynikow = new ScoreRow[10];
 
 	Preferences prefs;
 	public AudioModule audioModule;
@@ -50,12 +56,19 @@ public class OccupyTheColor extends ApplicationAdapter implements GestureDetecto
 	String current_view_str;
 	Random x;
 	public int save_number = 0;
+	int[][] player_sets = {
+			{0, 0, 0, 35, 1, 0},
+			{1, 2, 2, 37, 0, 1000},
+			{2, 13, 3, 40, 0, 2200},
+			{3, 7, 1, 43, 0, 4800},
+			{4, 18, 5, 45, 0, 8999}};
 
 	// SETTINGS
 	public int audioEnable = 2;
 	final int  BODY_SKINS = 5;
 	final int HAIR_SKINS = 20;
 	final int EYES_SKINS = 6;
+	boolean easy_mode = false;
 
 	// VIEWS CONSTANS
 	int VIEW_SPLASH_SCREEN = 0;
@@ -75,6 +88,14 @@ public class OccupyTheColor extends ApplicationAdapter implements GestureDetecto
 	Player[] other_player = new Player[11];
 	Player[] other_player_copy = new Player[11];
 	int how_many_players = 0;
+	int time_max = 1500;
+	int time_current = time_max;
+	int proba = 0;
+	int punkty = 0;
+	int timer_last = 0;
+	int rand_color = 0;
+	int player_set = 0;
+	int coins = 0;
 	
 	@Override
 	public void create () {
@@ -84,6 +105,9 @@ public class OccupyTheColor extends ApplicationAdapter implements GestureDetecto
 		shadow_dark = new Texture("maps/lights/dark.png");
 		shadow_world_light = new Texture("maps/lights/whole_spot.png");
 		d_pad = new Texture("gui/d_pad.png");
+		candle = new Sprite(new Texture("candle.png"));
+
+		dark = new Texture("maps/lights/dark.png");
 
 		ResX = proporcje('x');
 		ResY = proporcje('y');
@@ -95,9 +119,16 @@ public class OccupyTheColor extends ApplicationAdapter implements GestureDetecto
 		audioModule = new AudioModule(this);
 		prefs = Gdx.app.getPreferences("Prefs");
 		P_name = loadString("player_name", "player");
-		save_number = loadInt("save_number", 0);
 		x = new Random();
 		audioEnable = loadInt("audioEnable", 2);
+		easy_mode = loadBoolean("easy_mode", false);
+		player_set = loadInt("player_set", 0);
+		coins = loadInt("coins", 0);
+		for(int i = 0; i < tabela_wynikow.length; i++){
+			if(loadBoolean("score_i" + i, false)) tabela_wynikow[i] = new ScoreRow(loadString("score_n" + i, ""), loadString("score_s" + i, ""));
+			else tabela_wynikow[i] = new ScoreRow();
+		}
+		for(int i = 1; i < player_sets.length; i++) player_sets[i][4] = loadInt("secik" + i, 0);
 
 		// CREATE VIEWS
 		views.put(ViewSplash.NAME, new ViewSplash(batch, this));
@@ -105,9 +136,10 @@ public class OccupyTheColor extends ApplicationAdapter implements GestureDetecto
 		views.put(ViewLobby.NAME, new ViewLobby(batch, this));
 		changeView(ViewSplash.NAME);
 
-		player = new Player(loadInt("player_char", 0), view_current, this);
-		player.setHairs(loadInt("player_hairs", 0));
-		player.setEyes(loadInt("player_eyes", 0));
+		player = new Player(player_sets[player_set][0], view_current, this);
+		player.setHairs(player_sets[player_set][1]);
+		player.setEyes(player_sets[player_set][2]);
+		player.setSpeed(player_sets[player_set][3]);
 		player.setName(P_name);
 		player.id = 1;
 
@@ -141,6 +173,26 @@ public class OccupyTheColor extends ApplicationAdapter implements GestureDetecto
 			other_player_copy[i] = new Player(view_current, this);
 		}
 
+		fields[0] = new Field(3, 71, this);
+		fields[1] = new Field(6, 8, this);
+		fields[2] = new Field(36, 35, this);
+		fields[3] = new Field(58, 62, this);
+		fields[4] = new Field(67, 12, this);
+		fields[5] = new Field(102, 46, this);
+		fields[6] = new Field(135, 73, this);
+		fields[7] = new Field(137, 6, this);
+		all_colors[0] = new FieldColor(Color.CYAN, "Cyjan");
+		all_colors[1] = new FieldColor(Color.TEAL, "Morski");
+		all_colors[2] = new FieldColor(Color.MAGENTA, "Magenta");
+		all_colors[3] = new FieldColor(Color.CHARTREUSE, "Chartreuse");
+		all_colors[4] = new FieldColor(Color.GOLDENROD, "Goldenrod");
+		all_colors[5] = new FieldColor(Color.LIME, "Limonka");
+		all_colors[6] = new FieldColor(Color.MAROON, "Kasztanowy");
+		all_colors[7] = new FieldColor(Color.SALMON, "Łososiowy");
+		reload_colors();
+		candle.setOrigin(75, 75);
+		candle.setScale(ResX, ResY);
+
 	}
 
 	@Override
@@ -153,6 +205,63 @@ public class OccupyTheColor extends ApplicationAdapter implements GestureDetecto
 	public void dispose () {
 		batch.dispose();
 		img.dispose();
+	}
+
+	public void reload_colors(){
+		shuffleArray(all_colors);
+		for(int i = 0; i < fields.length; i ++){
+			fields[i].set_color(all_colors[i]);
+		}
+	}
+
+	static void shuffleArray(FieldColor[] ar)
+	{
+		Random rnd = new Random();
+		for (int i = ar.length - 1; i > 0; i--)
+		{
+			int index = rnd.nextInt(i + 1);
+			// Simple swap
+			FieldColor a = ar[index];
+			ar[index] = ar[i];
+			ar[i] = a;
+		}
+	}
+
+	void put_highscore(String name, int score){
+		String help_s = "";
+		String help_i = "";
+		boolean help_b = false;
+		int found = -1;
+		for(int i = 0; i < tabela_wynikow.length; i++){
+			if(found == -1 && Integer.parseInt(tabela_wynikow[i].getScore()) <= score){
+				found = i;
+				help_s = tabela_wynikow[i].getName();
+				help_i = tabela_wynikow[i].getScore();
+				help_b = tabela_wynikow[i].getIs();
+				tabela_wynikow[i].setName(name);
+				tabela_wynikow[i].setScore(score);
+				tabela_wynikow[i].setIs(true);
+				break;
+			}
+		}
+		if(found > -1) {
+			for (int i = tabela_wynikow.length - 1; i > found; i--) {
+				if(i > found + 1){
+					tabela_wynikow[i].setName(tabela_wynikow[i - 1].getName());
+					tabela_wynikow[i].setScore(tabela_wynikow[i - 1].getScore());
+					tabela_wynikow[i].setIs(tabela_wynikow[i - 1].getIs());
+				}else{
+					tabela_wynikow[i].setName(help_s);
+					tabela_wynikow[i].setScore(help_i);
+					tabela_wynikow[i].setIs(help_b);
+				}
+			}
+		}
+		for(int i = 0; i < tabela_wynikow.length; i++){
+			saveBoolean("score_i" + i, tabela_wynikow[i].getIs());
+			saveString("score_n" + i, tabela_wynikow[i].getName());
+			saveString("score_s" + i, tabela_wynikow[i].getScore());
+		}
 	}
 
 	public void changeView(String x){

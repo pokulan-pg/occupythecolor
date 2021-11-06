@@ -131,7 +131,8 @@ public class Player implements Comparable<Player>{
                 step_timer = 0;
             }
             move = false;
-            mud_part.play((int)pos_x, (int)pos_y);
+            if(field == 0) mud_part.play((int)pos_x, (int)pos_y);
+            else water_part.play((int)pos_x, (int)pos_y);
         }
     }
 
@@ -139,6 +140,7 @@ public class Player implements Comparable<Player>{
     public int getHead(){return animation;}
     public int getHairs(){return hairs;}
     public int getEyes(){return eyes;}
+    public void setSpeed(int s){speed = s/100.0f;}
 
     public float getPos_x() {
         return pos_x;
@@ -211,30 +213,43 @@ public class Player implements Comparable<Player>{
 
     public void setTimeout(float x){timeout = x;}
 
-    public void move_player(){
+    public void move_player(int field){
         for(int i = 0; i <2; i++) {
             if (Gdx.input.isTouched(i)) {
                 if (view.isTap2(3, 65, 34, 56, i) && pos_y < otc.gameScreenY - 8) {
                     otc.player.addPos_y(1 * otc.ResY * 0.2f, speed); // UP
-                    otc.audioModule.playGroundStep();
-                    step_sound = false;
+                    if (step_sound){
+                        if(field == 0) otc.audioModule.playGroundStep();
+                        else otc.audioModule.playFieldStep();
+                        step_sound = false;
+                    }
                 } else if (view.isTap2(3, 88, 34, 79, i) && pos_y > 0) {
                     otc.player.addPos_y(-1 * otc.ResY * 0.2f, speed); // DOWN
-                    otc.audioModule.playGroundStep();
-                    step_sound = false;
+                    if (step_sound){
+                        if(field == 0) otc.audioModule.playGroundStep();
+                        else otc.audioModule.playFieldStep();
+                        step_sound = false;
+                    }
                 }
 
                 if (view.isTap2(26, 87, 34, 56, i) && pos_x < otc.gameScreenX - 5) {
                     otc.player.addPos_x(1 * otc.ResX * 0.2f, speed); // RIGHT
-                    if (step_sound)
-                        otc.audioModule.playGroundStep();
+                    if (step_sound){
+                        if(field == 0) otc.audioModule.playGroundStep();
+                        else otc.audioModule.playFieldStep();
+                        step_sound = false;
+                    }
                 } else if (view.isTap2(3, 87, 19, 56, i) && pos_x > 0) {
                     otc.player.addPos_x(-1 * otc.ResX * 0.2f, speed); // LEFT
-                    if (step_sound)
-                        otc.audioModule.playGroundStep();
+                    if (step_sound){
+                        if(field == 0) otc.audioModule.playGroundStep();
+                        else otc.audioModule.playFieldStep();
+                        step_sound = false;
+                    }
                 }
             }
         }
+        step_sound = true;
     }
 
     @Override
