@@ -153,6 +153,8 @@ public class ViewLobby extends View {
     }
 
     void draw_lights(){
+        if(!otc.easy_mode) otc.candle.setScale(otc.ResX * (8.0f / (otc.proba + 6)), otc.ResY * (8.0f / (otc.proba + 6)));
+        else otc.candle.setScale(otc.ResX, otc.ResY);
         otc.view_current.draw_sprite(otc.candle, otc.player.getPos_x(), otc.player.getPos_y(), batch_light);
         if(boost_enable){
             for(Field field : otc.fields) {

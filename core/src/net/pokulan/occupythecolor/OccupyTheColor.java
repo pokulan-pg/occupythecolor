@@ -31,8 +31,10 @@ public class OccupyTheColor extends ApplicationAdapter implements GestureDetecto
 	Sprite candle;
 	Texture dark;
 	View view_current;
-	Field[] fields = new Field[8];
-	FieldColor[] all_colors = new FieldColor[8];
+	static int fields_count = 8;
+	static int colors_count = 12;
+	Field[] fields = new Field[fields_count];
+	FieldColor[] all_colors = new FieldColor[colors_count];
 
 	public Map<String, View> views = new HashMap<String, View>();
 	ScoreRow[] tabela_wynikow = new ScoreRow[10];
@@ -189,6 +191,11 @@ public class OccupyTheColor extends ApplicationAdapter implements GestureDetecto
 		all_colors[5] = new FieldColor(Color.LIME, "Limonka");
 		all_colors[6] = new FieldColor(Color.MAROON, "Kasztanowy");
 		all_colors[7] = new FieldColor(Color.SALMON, "Łososiowy");
+
+		all_colors[8] = new FieldColor(Color.VIOLET, "Fiolet");
+		all_colors[9] = new FieldColor(Color.NAVY, "Navy");
+		all_colors[10] = new FieldColor(Color.CORAL, "Koralowy");
+		all_colors[11] = new FieldColor(Color.OLIVE, "Oliwkowy");
 		reload_colors();
 		candle.setOrigin(75, 75);
 		candle.setScale(ResX, ResY);
